@@ -80,7 +80,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    clientOptions := options.Client().ApplyURI("your-mongo-uri")
+    clientOptions := options.Client().ApplyURI("mongodb+srv://prachhhi:oprybBJBWko7zbjE@cluster0.r487mib.mongodb.net/?retryWrites=true&w=majority")
     var err error
     client, err = mongo.Connect(context.Background(), clientOptions)
     if err != nil {
