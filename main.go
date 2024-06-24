@@ -1,6 +1,5 @@
 package main
 
-
 import (
     "context"
     "encoding/json"
@@ -8,8 +7,7 @@ import (
     "log"
     "net/http"
     "path/filepath"
-	"os"
-    "fmt"
+
     "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
@@ -23,26 +21,6 @@ type Order struct {
 }
 
 var client *mongo.Client
-
-func main() {
-    // Connect to MongoDB
-    clientOptions := options.Client().ApplyURI("mongodb+srv://prachhhi:oprybBJBWko7zbjE@cluster0.r487mib.mongodb.net/?retryWrites=true&w=majority")
-    var err error
-    client, err = mongo.Connect(context.Background(), clientOptions)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    defer func() {
-        if err = client.Disconnect(context.Background()); err != nil {
-            log.Fatal(err)
-        }
-    }()
-	http.HandleFunc("/", handleRoot)
-    http.HandleFunc("/", handleFormSubmission)
-    http.HandleFunc("/map", handleMapDisplay)
-    log.Fatal(http.ListenAndServe(":8080", nil))
-}
 
 func handleFormSubmission(w http.ResponseWriter, r *http.Request) {
     if r.Method == http.MethodPost {
@@ -90,10 +68,32 @@ func handleMapDisplay(w http.ResponseWriter, r *http.Request) {
     tmpl.Execute(w, string(data))
 }
 
-func handleRoot(w http.ResponseWriter, r *http.Request) {
-    if r.URL.Path != "/" {
+func Handler(w http.ResponseWriter, r *http.Request) {
+    switch r.URL.Path {
+    case "/":
+        handleFormSubmission(w, r)
+    case "/map":
+        handleMapDisplay(w, r)
+    default:
         http.NotFound(w, r)
-        return
     }
-    http.Redirect(w, r, "/form", http.StatusSeeOther)
+}
+
+func main() {
+    clientOptions := options.Client().ApplyURI("your-mongo-uri")
+    var err error
+    client, err = mongo.Connect(context.Background(), clientOptions)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer func() {
+        if err = client.Disconnect(context.Background()); err != nil {
+            log.Fatal(err)
+        }
+    }()
+
+    http.HandleFunc("/", handleFormSubmission)
+    http.HandleFunc("/map", handleMapDisplay)
+    log.Fatal(http.ListenAndServe(":8080", nil))
 }
