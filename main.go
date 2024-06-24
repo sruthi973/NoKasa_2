@@ -1,5 +1,6 @@
 package main
 
+
 import (
     "context"
     "encoding/json"
@@ -7,7 +8,8 @@ import (
     "log"
     "net/http"
     "path/filepath"
-
+	"os"
+    "fmt"
     "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
@@ -36,7 +38,7 @@ func main() {
             log.Fatal(err)
         }
     }()
-
+	http.HandleFunc("/", handleRoot)
     http.HandleFunc("/", handleFormSubmission)
     http.HandleFunc("/map", handleMapDisplay)
     log.Fatal(http.ListenAndServe(":8080", nil))
@@ -86,4 +88,12 @@ func handleMapDisplay(w http.ResponseWriter, r *http.Request) {
 
     tmpl, _ := template.ParseFiles(filepath.Join("templates", "map.html"))
     tmpl.Execute(w, string(data))
+}
+
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+    if r.URL.Path != "/" {
+        http.NotFound(w, r)
+        return
+    }
+    http.Redirect(w, r, "/form", http.StatusSeeOther)
 }
